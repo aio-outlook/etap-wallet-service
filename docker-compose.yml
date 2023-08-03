@@ -1,0 +1,30 @@
+services:
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: "${APP_ENV}"
+    volumes:
+      - .:/usr/src/app
+    env_file:
+    - .env
+    command: npm run start:dev
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    depends_on:
+      # - redis
+      - db
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      -  "${DB_PORT:-5432}:5432"
+    volumes:
+      - etap-wallet-db:/var/lib/postgresql/data
+volumes:
+  etap-wallet-db:
