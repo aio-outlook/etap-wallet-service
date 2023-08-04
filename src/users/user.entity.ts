@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Wallet } from 'src/wallets/entity/wallet.entity';
 
@@ -26,6 +26,12 @@ export class User {
   user_type: string;
 
   @OneToMany(()=>Wallet, wallets=>wallets.user) wallets:Wallet[]
+
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)" })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)", onUpdate: "CURRENT_TIMESTAMP(6)" })
+  updatedAt: Date;
 
   async validatePassword(password: string): Promise<boolean> {
     return bcrypt.compare(password, this.password);

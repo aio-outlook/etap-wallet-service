@@ -33,3 +33,4 @@ export class FundWalletDto {
     poyment_reference: string
 
   }
+

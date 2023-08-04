@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { InitFundWalletDto } from 'src/wallets/dto/initfund.wallet.dto';
 
 @Injectable()
 export class PaystackService {
@@ -12,6 +13,13 @@ export class PaystackService {
     }
 
     chargeCard(){}
+    
+    callbackGateway(){}
 
-    generatePaymentUrl(){}
+    generatePaymentUrl(initFund: InitFundWalletDto){
+
+        // generate paystack url
+
+        return `https://checkout.paystack.com/8uy2vevquw6osyi`
+    }
 }

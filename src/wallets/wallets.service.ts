@@ -2,12 +2,16 @@ import { HttpService } from '@nestjs/axios';
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosResponse } from 'axios';
+import { time } from 'console';
 import { firstValueFrom, Observable } from 'rxjs';
+import { PaystackService } from 'src/paystack/paystack.service';
 import { User } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
 import { FundWalletDto } from './dto/fund.wallet.dto';
+import { InitFundWalletDto } from './dto/initfund.wallet.dto';
 import { WalletDto } from './dto/wallet.dto';
 import { Wallet } from './entity/wallet.entity';
+import { TransactionStatus, TransactionType, WalletTransaction } from './entity/wallet.transaction.entity';
 
 @Injectable()
 export class WalletsService {
@@ -15,9 +19,10 @@ export class WalletsService {
     constructor(
         @InjectRepository(Wallet)
         private walletRepository: Repository<Wallet>,
-        
-        // private userRepository: Repository<User>,
-        private readonly httpService: HttpService
+        @InjectRepository(WalletTransaction)
+        private walletTrsansactionRepository: Repository<WalletTransaction>,
+        private readonly httpService: HttpService,
+        private readonly paystackService: PaystackService
         ){}
 
     async createWallet(walletDto: WalletDto, userInfo: User){
@@ -88,11 +93,27 @@ export class WalletsService {
             // Validate paystack payment reference
 
 
-            let walletDetails =await this.findWalletById(walletDto.walletId)
+            let walletDetails =await this.findUserWalletById(walletDto.walletId, userInfo.id)
             if (!walletDetails) {
                 throw new BadRequestException("Wallet not found.");
             }
 
+            let transaction =await this.walletTrsansactionRepository.findOne({where:{
+                paymentReference:walletDto.poyment_reference
+            }})
+            if (!transaction) {
+                throw new BadRequestException("Transaction does not exist found.");
+            }
+
+            if (transaction.status===TransactionStatus.PENDING) {
+                // check paystack
+                // if   trnx  not exist success on paystack
+                throw new BadRequestException("Invalid payment reference.");
+
+            }
+
+
+            // this.walletTrsansactionRepository.save()
 
 
 
@@ -107,22 +128,40 @@ export class WalletsService {
         }
     }
 
-    async initFunding(initFund:{amount: number, walletId: number}, userInfo: User){
+    async initFunding(initFund:InitFundWalletDto, userInfo: User){
         try {
 
-
-            console.log({initFund, userInfo});
-
-            let walletDetails =await this.findWalletById(initFund.walletId)
+            let walletDetails =await this.findUserWalletById(initFund.walletId, userInfo.id)
             if (!walletDetails) {
                 throw new BadRequestException("Wallet not found.");
             }
 
-            // Generate link from paystack
+            let transactionRef=`FUNDWALLET_${(Math.random() + 1).toString(36)}`;
 
+            let walletTransaction= new WalletTransaction();
+            walletTransaction.amount=initFund.amount;
+            walletTransaction.userId=userInfo.id;
+            walletTransaction.wallerId=initFund.walletId;
+            walletTransaction.paymentReference=transactionRef;
+            walletTransaction.transactionType=TransactionType.CREDIT;
 
             
-            return {status: true, message:"Success.", data:initFund}
+            // Generate link from paystack
+            let url= this.paystackService.generatePaymentUrl(initFund)
+            
+            this.walletTrsansactionRepository.save(walletTransaction)
+            
+            let response={
+                status: true, message:"Success.",
+                data:{
+                    ...initFund,
+                    transactionRef,
+                    authorised_payment_url:url
+
+                }
+            }
+
+            return response
             
             
         } catch (error) {
@@ -133,7 +172,7 @@ export class WalletsService {
         }
     }
 
-    async findWalletById(id: number){
-      return await this.walletRepository.findOne({where:{id}})
+    async findUserWalletById(id: number, userId: number){
+      return await this.walletRepository.findOne({where:{id, user:{ id: userId}}})
     }
 }
