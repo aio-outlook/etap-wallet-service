@@ -16,17 +16,6 @@ import {
 } from 'class-validator';
 
 export class FundWalletDto {
-    @IsNumber()
-    @Min(1)
-    @Type(() => Number)
-    @ApiProperty({required: true })
-    amount: number;
-
-    @IsNumber()
-    @Min(1)
-    @ApiProperty({required: true })
-    walletId: number
-
     @IsString()
     @MinLength(5)
     @ApiProperty({required: true })

@@ -4,19 +4,21 @@ import { Repository } from 'typeorm';
 import { RegisterUserDto } from './register-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { AuthService } from 'src/auth/auth.service';
 
 
 @Injectable()
 export class UsersService {
     constructor (  
         @InjectRepository(User)
-        private userRepository: Repository<User>
+        private userRepository: Repository<User>,
+        // private readonly authService: AuthService
         ) {
         
     }
 
 
-    async create(registerUserDto: RegisterUserDto): Promise<User> {
+    async create(registerUserDto: RegisterUserDto): Promise<any> {
 
         try {
             
@@ -37,7 +39,12 @@ export class UsersService {
             user.password = hashedPassword;
             user.password = hashedPassword;
         
-            return await this.userRepository.save(user);
+            let resp= await this.userRepository.save(user);
+            delete resp.password
+
+            // authData=await this.authService.processToken(user)
+            return { status: true, message:"created.", data:resp}
+
 
         } catch (error) {
             // console.error("error creating user.", error); 

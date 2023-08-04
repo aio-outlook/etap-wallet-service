@@ -28,13 +28,13 @@ export class WalletsController {
     }
 
     @UseGuards(AuthGuard("jwt"))
-    @Post("fund")
+    @Post("external/fund")
     fundWalet(@Body() walletDto:FundWalletDto,  @Request() req){
         return this.walletService.fundWallet(walletDto, req.user)
     }
 
     @UseGuards(AuthGuard("jwt"))
-    @Post("init-funding")
+    @Post("external/init-funding")
     initFunding(@Body() initWalletDto:InitFundWalletDto,  @Request() req){
         return this.walletService.initFunding(initWalletDto, req.user)
     }

@@ -49,6 +49,23 @@ export class AuthService {
           refresh_token: refreshToken,
         };
       }
+
+      async processToken(user: User){
+        const payload = { sub: user.id, name: user.name };
+        const accessToken = await this.jwtService.signAsync(payload);
+        const refreshToken = await this.jwtService.signAsync(payload, {
+          expiresIn: '1d',
+        });
+    
+        // Store the refresh token in redis
+        await this.refreshTokenIdsStorage.insert(user.id, refreshToken);
+        return {
+          name: user.name,
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        };
+    
+      }
     
       async validateUser(phone: string, password: string): Promise<any> {
         const user = await this.usersService.findByPhone(phone);

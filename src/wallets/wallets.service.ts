@@ -6,7 +6,7 @@ import { time } from 'console';
 import { firstValueFrom, Observable } from 'rxjs';
 import { PaystackService } from 'src/paystack/paystack.service';
 import { User } from 'src/users/user.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { FundWalletDto } from './dto/fund.wallet.dto';
 import { InitFundWalletDto } from './dto/initfund.wallet.dto';
 import { WalletDto } from './dto/wallet.dto';
@@ -22,7 +22,8 @@ export class WalletsService {
         @InjectRepository(WalletTransaction)
         private walletTrsansactionRepository: Repository<WalletTransaction>,
         private readonly httpService: HttpService,
-        private readonly paystackService: PaystackService
+        private readonly paystackService: PaystackService,
+        private dataSource: DataSource
         ){}
 
     async createWallet(walletDto: WalletDto, userInfo: User){
@@ -58,7 +59,7 @@ export class WalletsService {
         }
     }
   async  getWallets(userInfo:User){
-        let wallets=await this.walletRepository.find({ where: { user:{id:userInfo.id} } })
+        let wallets=await this.walletRepository.find({ where: { user:{id:userInfo.id}, } })
         return {
             status: true,
             message: "Wallets",
@@ -86,45 +87,62 @@ export class WalletsService {
     getWallet(){}
 
     async fundWallet(walletDto: FundWalletDto, userInfo: User){
+        const queryRunner = this.dataSource.createQueryRunner();
         try {
-
+            await queryRunner.connect();
+            await queryRunner.startTransaction();
 
             console.log({walletDto, userInfo});
             // Validate paystack payment reference
 
 
-            let walletDetails =await this.findUserWalletById(walletDto.walletId, userInfo.id)
-            if (!walletDetails) {
-                throw new BadRequestException("Wallet not found.");
-            }
-
             let transaction =await this.walletTrsansactionRepository.findOne({where:{
                 paymentReference:walletDto.poyment_reference
-            }})
+            },
+            relations:{
+                wallet:true
+            }
+        })
             if (!transaction) {
                 throw new BadRequestException("Transaction does not exist found.");
             }
 
-            if (transaction.status===TransactionStatus.PENDING) {
-                // check paystack
-                // if   trnx  not exist success on paystack
-                throw new BadRequestException("Invalid payment reference.");
 
-            }
+            // if (process.env.APP_ENV!=="development") {
+                
+            
+                if (transaction.status===TransactionStatus.PENDING || transaction.status===TransactionStatus.FUNDED) {
+                    // check paystack
+                    // if   trnx  not exist success on paystack
+                    throw new BadRequestException("Invalid payment reference.");
 
+                }
 
-            // this.walletTrsansactionRepository.save()
+            // }
 
+            let {wallet}=transaction
 
+            wallet.balance=Number(wallet.balance)+Number(transaction.amount)
 
-            return {status: true, message:"Pending.", data:walletDto}
+            await queryRunner.manager.save(wallet);
+            transaction.status=TransactionStatus.FUNDED
+        
+            await queryRunner.manager.save(transaction);
+            // this.walletTrsansactionRepository.save(transaction)
+
+            await queryRunner.commitTransaction();
+
+            return {status: true, message:"Funded.", data:walletDto}
             
             
         } catch (error) {
+            await queryRunner.rollbackTransaction();
             if (error instanceof BadRequestException) {
                 throw new BadRequestException(error.message)
             }else throw new InternalServerErrorException("An error occur, try again.");
             
+        }finally{
+            await queryRunner.release();
         }
     }
 
@@ -141,7 +159,7 @@ export class WalletsService {
             let walletTransaction= new WalletTransaction();
             walletTransaction.amount=initFund.amount;
             walletTransaction.userId=userInfo.id;
-            walletTransaction.wallerId=initFund.walletId;
+            walletTransaction.walletId=initFund.walletId;
             walletTransaction.paymentReference=transactionRef;
             walletTransaction.transactionType=TransactionType.CREDIT;
 

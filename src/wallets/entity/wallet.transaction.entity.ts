@@ -41,7 +41,7 @@ export class WalletTransaction {
     name: 'walletId',
     nullable:false
   })
-  wallerId: number;
+  walletId: number;
 
   @Column({nullable:true})
   paymentReference: string;
