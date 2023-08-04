@@ -1,31 +1,42 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Pre Installation
+
+```bash
+Install Docker
+
+https://docs.docker.com/desktop/install/mac-install/
+https://docs.docker.com/desktop/install/windows-install/
+https://docs.docker.com/engine/install/ubuntu/
+
+```
+
+```bash
+
+Install docker compose
+
+https://dockerlabs.collabnix.com/intermediate/workshop/DockerCompose/How_to_Install_Docker_Compose.html
+
+```
+
+```bash
+
+Install node (Min: 16)
+
+https://nodejs.org/ja/blog/release/v16.16.0
+```
+
+```bash
+
+Install nest cli
+
+$ npm install -g @nestjs/cli
+
+https://docs.nestjs.com/cli/overview
+```
 ## Installation
 
 ```bash
@@ -35,6 +46,27 @@ $ npm install
 ## Running the app
 
 ```bash
+# Copy .env.example
+$  mv .env.example .env 
+
+# Configure .env params
+
+APP_NAME=etap-wallet
+APP_ENV=development
+APP_PORT=3000
+DB_HOST=0.0.0.0
+DB_NAME=etap-wallet
+DB_USER="postgres"
+DB_PASSWORD="pass"
+DB_PORT=5432
+REDIS_PORT=6390
+RUN_MIGRATIONS=true
+JWT_SECRET=secret
+OPEN_EXCHANGE_RATES_URL=https://openexchangerates.org/api/
+
+# Start App data layer dependencies
+$  docker compose up  
+
 # development
 $ npm run start
 
@@ -45,6 +77,13 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## App docs
+
+```bash
+# api swagger documentation
+$ http://localhost:3000/api#/
+
+```
 ## Test
 
 ```bash
@@ -58,16 +97,7 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
 ## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- Author - Isaiah Adeleke
 
-## License
-
-Nest is [MIT licensed](LICENSE).
