@@ -6,12 +6,18 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // app.useGlobalGuards()
+
   app.useGlobalPipes(new ValidationPipe());
+
   const config = new DocumentBuilder()
   .setTitle('etap wallet')
   .setDescription('Users wallet manager')
   .setVersion('1.0')
-  .addTag('wallet')
+  .addBearerAuth(
+    { type: 'http', scheme: 'bearer', bearerFormat: 'JWT', in: 'header' },
+    'access-token',
+    )
   .build();
 
   const document = SwaggerModule.createDocument(app, config);

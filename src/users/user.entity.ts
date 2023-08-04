@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Wallet } from 'src/wallets/entity/wallet.entity';
+
 
 
 export enum UserType {
@@ -22,6 +24,8 @@ export class User {
 
   @Column({type: "enum", enum: UserType, default: UserType.OWNER})
   user_type: string;
+
+  @OneToMany(()=>Wallet, wallets=>wallets.user) wallets:Wallet[]
 
   async validatePassword(password: string): Promise<boolean> {
     return bcrypt.compare(password, this.password);
