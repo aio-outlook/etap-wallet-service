@@ -6,8 +6,9 @@ import { time } from 'console';
 import { firstValueFrom, Observable } from 'rxjs';
 import { PaystackService } from 'src/paystack/paystack.service';
 import { User } from 'src/users/user.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { FundWalletDto } from './dto/fund.wallet.dto';
+import { FundWalletToWalletDto } from './dto/fund.walletToWallet.dto';
 import { InitFundWalletDto } from './dto/initfund.wallet.dto';
 import { WalletDto } from './dto/wallet.dto';
 import { Wallet } from './entity/wallet.entity';
@@ -146,6 +147,39 @@ export class WalletsService {
         }
     }
 
+    async walletToWalletTransfer(fundWalletToWalletDto: FundWalletToWalletDto, userInfo: User){
+        const queryRunner = this.dataSource.createQueryRunner();
+        try {
+          
+            console.log({fundWalletToWalletDto});
+
+            let wallet=this.walletRepository.find({where:{
+                id: In([fundWalletToWalletDto.sourceWalletId,fundWalletToWalletDto.destinationWalletId]) , user:{
+                    id:userInfo.id
+                }}
+            });
+
+            console.log({wallet});
+            
+            // convert currency value
+
+
+            // end conversion
+
+            let transactionHistory=new WalletTransaction()
+
+
+            
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            if (error instanceof BadRequestException) {
+                throw new BadRequestException(error.message)
+            }else throw new InternalServerErrorException("An error occur, try again.");
+            
+        }finally{
+            await queryRunner.release();
+        }
+    }
     async initFunding(initFund:InitFundWalletDto, userInfo: User){
         try {
 

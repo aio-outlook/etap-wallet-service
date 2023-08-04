@@ -3,6 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { FundWalletDto } from './dto/fund.wallet.dto';
+import { FundWalletToWalletDto } from './dto/fund.walletToWallet.dto';
 import { InitFundWalletDto } from './dto/initfund.wallet.dto';
 import { WalletDto } from './dto/wallet.dto';
 import { WalletsService } from './wallets.service';
@@ -39,8 +40,9 @@ export class WalletsController {
         return this.walletService.initFunding(initWalletDto, req.user)
     }
     @UseGuards(AuthGuard("jwt"))
-    @Get()
-    walletToWalletTransfer(){
+    @Post("user/internal/transfer")
+    walletToWalletTransfer(@Body() fundWalletToWalletDto:FundWalletToWalletDto,  @Request() req){
+
         return "Wallets!"
     }
 

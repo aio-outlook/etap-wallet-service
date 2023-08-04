@@ -6,7 +6,7 @@ import {
   Min,
 } from 'class-validator';
 
-export class InitFundWalletDto {
+export class FundWalletToWalletDto {
   @IsNumber()
   @Min(1)
   @Type(() => Number)
@@ -16,7 +16,12 @@ export class InitFundWalletDto {
   @IsNumber()
   @Min(1)
   @ApiProperty({required: true })
-  walletId: number
+  sourceWalletId: number
+
+  @IsNumber()
+  @Min(1)
+  @ApiProperty({required: true })
+  destinationWalletId: number
 
 }
 
